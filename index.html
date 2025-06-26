@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Менеджер Ставок (Келли + Восстановление)</title>
+    <title>Менеджер Ставок (Версия 4)</title>
     <style>
         /* Общие стили */
         * {
@@ -576,7 +576,7 @@
                 if (recommendedBreakevenBet > 0 && currentBankroll > 0) {
                     recommendedBreakevenBetDisplay.textContent = formatNumber(recommendedBreakevenBet);
                     recommendedBreakevenBetDisplay.classList.remove("neutral");
-                    recommendedBreakevenBetDisplay.classList.add("loss"); // Indicate it's for recovery from loss
+                    recommendedBreakevenBetDisplay.classList.add("loss"); /* Using 'loss' class to visually tie to recovery from loss, or create 'recovery' class */
                 } else {
                     recommendedBreakevenBetDisplay.textContent = formatNumber(0);
                     recommendedBreakevenBetDisplay.classList.add("neutral");
@@ -624,11 +624,11 @@
                 });
 
                 input.addEventListener("click", (e) => {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent default mobile keyboard from appearing
                     activeInput = input;
                     customKeyboard.classList.add("visible");
                     document.body.classList.add("keyboard-active");
-                    activeInput.focus();
+                    activeInput.focus(); // Set focus for caret
                 });
 
                 input.addEventListener("input", () => {
@@ -649,14 +649,14 @@
             kellyMultiplierSelect.addEventListener('change', () => {
                 kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
                 updateDisplays();
-                hideKeyboard();
+                // No hideKeyboard() here as dropdown itself closes upon selection
             });
 
 
             // Keyboard button click handler
             keyboardButtons.forEach(button => {
                 button.addEventListener("click", (e) => {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent blur on active input
                     if (!activeInput) return;
 
                     const key = button.dataset.key;
@@ -673,7 +673,7 @@
                             }
                         }
                     } else {
-                        const maxInputLength = (activeInput.id === "initialBankroll") ? 10 : 5;
+                        const maxInputLength = (activeInput.id === "initialBankroll") ? 10 : 5; // e.g., "10000,00" or "10,50"
                         if (currentValue.length < maxInputLength) {
                             const parts = currentValue.split(',');
                             if (parts.length === 1) {
@@ -683,7 +683,7 @@
                             }
                         }
                     }
-                    activeInput.dispatchEvent(new Event('input'));
+                    activeInput.dispatchEvent(new Event('input')); // Trigger input event for display update
                 });
             });
 
@@ -694,8 +694,9 @@
                     return;
                 }
                 const { recommendedKellyBetSize } = calculateKellyBet();
-                // For simplicity, we use Kelly recommended size here. User might manually use break-even bet.
-                // If user wants to choose between Kelly and Break-even, we'd need another input.
+                // Here, we decide which bet amount to use for the transaction.
+                // For this version, we'll continue using Kelly's recommended size for actual transaction,
+                // as the 'break-even bet' is merely a suggestion for the user.
                 const betAmount = recommendedKellyBetSize; 
 
                 if (betAmount <= 0) {
@@ -729,17 +730,29 @@
 
             resetBtn.addEventListener("click", resetData);
 
+            // Global click listener for hiding keyboard
             document.addEventListener('click', (event) => {
-                if (customKeyboard.classList.contains('visible') && activeInput) {
-                    const isClickInsideKeyboard = customKeyboard.contains(event.target);
-                    const isClickOnInput = activeInput.contains(event.target);
-                    const isClickOnSelect = (activeInput.tagName === 'SELECT' && activeInput.contains(event.target));
-                    const isClickOnBetButton = winBtn.contains(event.target) || loseBtn.contains(event.target);
-                    const isClickOnResetButton = resetBtn.contains(event.target);
+                // Check if the clicked element is one of the input/select fields that use the keyboard
+                const isClickOnAKeyboardInput = 
+                    event.target === initialBankrollInput || 
+                    event.target === oddsInput || 
+                    event.target === winProbabilityInput ||
+                    event.target === kellyMultiplierSelect;
 
-                    if (!isClickInsideKeyboard && !isClickOnInput && !isClickOnSelect && !isClickOnBetButton && !isClickOnResetButton) {
-                        hideKeyboard();
-                    }
+                const isClickInsideKeyboard = customKeyboard.contains(event.target);
+                const isClickOnBetButton = winBtn.contains(event.target) || loseBtn.contains(event.target);
+                const isClickOnResetButton = resetBtn.contains(event.target);
+
+                // Only hide keyboard if it's visible, and the click is NOT:
+                // - inside the keyboard itself
+                // - on any of the input/select fields (this allows switching between inputs without flicker)
+                // - on a bet/reset button (these explicitly hide keyboard in their own handlers)
+                if (customKeyboard.classList.contains('visible') && 
+                    !isClickInsideKeyboard && 
+                    !isClickOnAKeyboardInput && 
+                    !isClickOnBetButton && 
+                    !isClickOnResetButton) {
+                    hideKeyboard();
                 }
             });
         });
