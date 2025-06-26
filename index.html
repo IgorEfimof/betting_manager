@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Менеджер Ставок</title>
+    <title>Менеджер Ставок (Келли)</title>
     <style>
         /* Общие стили */
         * {
@@ -64,20 +64,20 @@
 
         .input-item, .display-item {
             display: flex;
-            justify-content: space-between; /* Keeps elements spaced out */
+            justify-content: space-between;
             align-items: center;
             font-size: 0.9rem;
         }
 
         .input-item label, .display-item label {
             color: #ccc;
-            flex-shrink: 0; /* Prevents label from shrinking */
-            margin-right: 0.5rem; /* Space between label and input */
+            flex-shrink: 0;
+            margin-right: 0.5rem;
         }
 
-        .input-item input[type="text"] {
-            flex-grow: 1; /* Allows input to take available space */
-            min-width: 0; /* Allows input to shrink properly on small screens */
+        .input-item input[type="text"], .input-item select {
+            flex-grow: 1;
+            min-width: 0; /* Allows input to shrink properly */
             padding: 0.4rem;
             font-size: 0.9rem;
             text-align: center;
@@ -88,9 +88,17 @@
             caret-color: transparent;
             -webkit-user-select: none;
             user-select: none;
-            /* max-width removed here to allow more flexibility */
         }
         
+        .input-item select {
+            appearance: none; /* Remove default arrow on iOS */
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            padding-right: 2rem; /* Make space for custom arrow */
+        }
+
         .display-item span {
             font-size: 1rem;
             font-weight: bold;
@@ -98,6 +106,9 @@
         }
         .display-item span.loss {
             color: #ef5350;
+        }
+        .display-item span.neutral {
+            color: #ffa726; /* Orange for zero/neutral */
         }
 
         .buttons-row {
@@ -139,7 +150,7 @@
             background-color: #607d8b;
             color: white;
             border: none;
-            border-radius: 66px;
+            border-radius: 6px;
             cursor: pointer;
             transition: background 0.3s ease;
             width: 100%;
@@ -217,6 +228,19 @@
             font-weight: 500;
             border-left: 5px solid #ff9800;
         }
+        .kelly-warning {
+            background-color: #f44336; /* Red for strong warning */
+            color: white;
+            padding: 0.6rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .kelly-warning.positive {
+            background-color: #4CAF50; /* Green for positive edge */
+        }
+
 
         /* Медиа-запросы для узких экранов (смартфоны и планшеты в портрете) */
         @media (max-width: 768px) {
@@ -241,6 +265,10 @@
                 padding: 0.5rem;
                 font-size: 0.7rem;
             }
+            .kelly-warning {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
 
             .input-group, .display-group {
                 padding: 0.5rem;
@@ -253,13 +281,16 @@
 
             .input-item label, .display-item label {
                 font-size: 0.75rem;
-                margin-right: 0.3rem; /* Slightly reduced margin */
+                margin-right: 0.3rem;
             }
 
-            .input-item input[type="text"] {
+            .input-item input[type="text"], .input-item select {
                 padding: 0.3rem;
                 font-size: 0.8rem;
-                /* max-width removed */
+            }
+            .input-item select {
+                padding-right: 1.5rem; /* Adjust for smaller font */
+                background-position: right 0.25rem center;
             }
 
             .display-item span {
@@ -295,8 +326,13 @@
             h1 { font-size: 0.95rem; }
             p { font-size: 0.7rem; }
             .warning-message { font-size: 0.65rem; padding: 0.4rem; }
-            .input-item label, .display-item label { font-size: 0.75rem; margin-right: 0.2rem; } /* Further reduced margin */
-            .input-item input, .display-item span { font-size: 0.8rem; padding: 0.25rem; }
+            .kelly-warning { font-size: 0.7rem; padding: 0.4rem; }
+            .input-item label, .display-item label { font-size: 0.75rem; margin-right: 0.2rem; }
+            .input-item input, .display-item span, .input-item select { font-size: 0.8rem; padding: 0.25rem; }
+            .input-item select {
+                padding-right: 1.5rem;
+                background-position: right 0.2rem center;
+            }
             .buttons-row button, #resetBtn { font-size: 0.8rem; padding: 0.5rem; }
 
             body.keyboard-active .container {
@@ -308,12 +344,12 @@
 <body>
     <div class="container">
         <header>
-            <h1>Менеджер Ставок (Процентный Флэт)</h1>
-            <p>Управляйте своим банкроллом эффективно.</p>
+            <h1>Менеджер Ставок (Келли)</h1>
+            <p>Управляйте банкроллом, основываясь на математическом ожидании.</p>
         </header>
 
         <div class="warning-message">
-            <p><strong>Важное примечание:</strong> При коэффициенте 1.30, чтобы быть в долгосрочном плюсе, ваша проходимость должна быть выше 77% ($1 / 1.30 \approx 0.769$). При заявленных 60-70% проходимости эта стратегия будет убыточной на длинной дистанции. Программа поможет управлять убытками, но не сделает минусовую стратегию плюсовой.</p>
+            <p><strong>Важное примечание:</strong> Чтобы быть в плюсе на дистанции, математическое ожидание (EV) вашей стратегии должно быть положительным. Никакая стратегия управления ставками не сделает минусовую стратегию плюсовой.</p>
         </div>
 
         <div class="input-group">
@@ -322,12 +358,20 @@
                 <input type="text" id="initialBankroll" inputmode="none" value="1000" readonly>
             </div>
             <div class="input-item">
-                <label for="betPercentage">Процент от банкролла на ставку (%):</label>
-                <input type="text" id="betPercentage" inputmode="none" value="2" readonly>
-            </div>
-            <div class="input-item">
                 <label for="odds">Коэффициент ставки:</label>
                 <input type="text" id="odds" inputmode="none" value="1.30" readonly>
+            </div>
+            <div class="input-item">
+                <label for="winProbability">Ваша Вероятность Выигрыша (%):</label>
+                <input type="text" id="winProbability" inputmode="none" value="65" readonly>
+            </div>
+            <div class="input-item">
+                <label for="kellyMultiplier">Множитель Келли:</label>
+                <select id="kellyMultiplier">
+                    <option value="1">1x Келли (агрессивно)</option>
+                    <option value="0.5" selected>0.5x Келли (рекомендовано)</option>
+                    <option value="0.25">0.25x Келли (консервативно)</option>
+                </select>
             </div>
         </div>
 
@@ -337,13 +381,20 @@
                 <span id="currentBankrollDisplay">0.00</span>
             </div>
             <div class="display-item">
-                <label>Размер следующей ставки:</label>
-                <span id="nextBetSizeDisplay">0.00</span>
+                <label>Рекомендация Келли (доля банка):</label>
+                <span id="kellyFractionDisplay" class="neutral">0.00%</span>
+            </div>
+            <div class="display-item">
+                <label>Рекомендуемая сумма ставки:</label>
+                <span id="recommendedBetSizeDisplay">0.00</span>
             </div>
             <div class="display-item">
                 <label>Общая прибыль/убыток:</label>
                 <span id="totalProfitLossDisplay" class="loss">0.00</span>
             </div>
+        </div>
+        <div id="kellyWarningMessage" class="kelly-warning">
+            Математическое ожидание отрицательное (EV < 0). Келли рекомендует не ставить.
         </div>
 
         <div class="buttons-row">
@@ -374,12 +425,15 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             const initialBankrollInput = document.getElementById("initialBankroll");
-            const betPercentageInput = document.getElementById("betPercentage");
             const oddsInput = document.getElementById("odds");
+            const winProbabilityInput = document.getElementById("winProbability");
+            const kellyMultiplierSelect = document.getElementById("kellyMultiplier");
 
             const currentBankrollDisplay = document.getElementById("currentBankrollDisplay");
-            const nextBetSizeDisplay = document.getElementById("nextBetSizeDisplay");
+            const kellyFractionDisplay = document.getElementById("kellyFractionDisplay");
+            const recommendedBetSizeDisplay = document.getElementById("recommendedBetSizeDisplay");
             const totalProfitLossDisplay = document.getElementById("totalProfitLossDisplay");
+            const kellyWarningMessage = document.getElementById("kellyWarningMessage");
 
             const winBtn = document.getElementById("winBtn");
             const loseBtn = document.getElementById("loseBtn");
@@ -391,42 +445,82 @@
             let activeInput = null;
             let initialBankroll = parseFloat(initialBankrollInput.value);
             let currentBankroll = initialBankroll;
-            let betPercentage = parseFloat(betPercentageInput.value);
             let odds = parseFloat(oddsInput.value);
+            let winProbability = parseFloat(winProbabilityInput.value) / 100; // Convert to decimal
+            let kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
 
-            // Function to format numbers (e.g., 1234.5 to 1,234.50 or just 1234.5)
-            const formatNumber = (num) => {
+            // Function to format numbers
+            const formatNumber = (num, decimals = 2) => {
                 if (!isFinite(num)) {
                     return 'Ошибка';
                 }
-                return num.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                return num.toLocaleString('ru-RU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
             };
 
-            const calculateNextBetSize = () => {
-                let calculatedSize = currentBankroll * (betPercentage / 100);
-                
-                if (currentBankroll <= 0) {
-                    return 0; // If bankroll is zero or negative, no bet
+            const calculateKellyBet = () => {
+                const b = odds - 1; // Коэффициент выигрыша (Profit from 1 unit bet)
+                const p = winProbability; // Вероятность выигрыша
+                const q = 1 - p; // Вероятность проигрыша
+
+                let kellyFraction = (b * p - q) / b;
+
+                // Apply Kelly Multiplier
+                kellyFraction *= kellyMultiplier;
+
+                // Ensure Kelly fraction is not negative or excessively large
+                if (kellyFraction < 0) {
+                    kellyFraction = 0; // If EV is negative, Kelly recommends 0 bet
                 }
+                
+                // Display Kelly warning if EV is negative
+                if ((b * p - q) < 0) {
+                    kellyWarningMessage.textContent = `Математическое ожидание отрицательное (EV < 0). Келли рекомендует не ставить.`;
+                    kellyWarningMessage.classList.remove("positive");
+                    kellyWarningMessage.style.display = 'block';
+                } else if (kellyFraction === 0 && (b * p - q) >= 0) {
+                    // This case is for very small positive edge that results in very small fraction, rounded to 0
+                    kellyWarningMessage.textContent = `Математическое ожидание положительное (EV > 0), но рекомендованная доля очень мала.`;
+                    kellyWarningMessage.classList.add("positive");
+                    kellyWarningMessage.style.display = 'block';
+                }
+                 else {
+                    kellyWarningMessage.textContent = `Математическое ожидание положительное (EV > 0).`;
+                    kellyWarningMessage.classList.add("positive");
+                    kellyWarningMessage.style.display = 'block';
+                }
+
+
+                let recommendedBetSize = currentBankroll * kellyFraction;
 
                 // Apply minimum bet rule
-                if (calculatedSize < MIN_BET) {
-                    calculatedSize = MIN_BET;
+                if (currentBankroll > 0) {
+                    recommendedBetSize = Math.max(recommendedBetSize, MIN_BET);
+                    // Ensure bet does not exceed current bankroll
+                    if (recommendedBetSize > currentBankroll) {
+                        recommendedBetSize = currentBankroll;
+                    }
+                } else {
+                    recommendedBetSize = 0; // If bankroll is 0 or negative, bet is 0
                 }
-
-                // Ensure bet does not exceed current bankroll
-                if (calculatedSize > currentBankroll) {
-                    calculatedSize = currentBankroll;
-                }
-                return calculatedSize;
+                
+                return { kellyFraction, recommendedBetSize };
             };
 
             const updateDisplays = () => {
-                let nextBetSize = calculateNextBetSize();
+                const { kellyFraction, recommendedBetSize } = calculateKellyBet();
                 let totalProfitLoss = currentBankroll - initialBankroll;
 
                 currentBankrollDisplay.textContent = formatNumber(currentBankroll);
-                nextBetSizeDisplay.textContent = formatNumber(nextBetSize);
+                kellyFractionDisplay.textContent = formatNumber(kellyFraction * 100, 2) + '%';
+                kellyFractionDisplay.className = 'neutral'; // Reset class
+                if (kellyFraction > 0) {
+                    kellyFractionDisplay.classList.add("profit");
+                } else {
+                    kellyFractionDisplay.classList.add("loss");
+                }
+
+
+                recommendedBetSizeDisplay.textContent = formatNumber(recommendedBetSize);
                 totalProfitLossDisplay.textContent = formatNumber(totalProfitLoss);
 
                 if (totalProfitLoss >= 0) {
@@ -440,8 +534,9 @@
 
             const resetData = () => {
                 initialBankroll = parseFloat(initialBankrollInput.value.replace(',', '.')) || 0;
-                betPercentage = parseFloat(betPercentageInput.value.replace(',', '.')) || 0;
                 odds = parseFloat(oddsInput.value.replace(',', '.')) || 0;
+                winProbability = parseFloat(winProbabilityInput.value.replace(',', '.')) / 100 || 0;
+                kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
 
                 currentBankroll = initialBankroll;
                 updateDisplays();
@@ -461,7 +556,7 @@
             updateDisplays();
 
             // Event Listeners for inputs
-            [initialBankrollInput, betPercentageInput, oddsInput].forEach(input => {
+            [initialBankrollInput, oddsInput, winProbabilityInput].forEach(input => {
                 input.setAttribute('inputmode', 'none');
                 input.setAttribute('readonly', 'readonly');
                 input.setAttribute('autocomplete', 'off');
@@ -487,16 +582,23 @@
                     const parsedValue = parseFloat(input.value.replace(',', '.'));
                     if (input.id === "initialBankroll") {
                         initialBankroll = parsedValue || 0;
-                        // When initial bankroll changes, current bankroll also resets to this new initial value
-                        currentBankroll = initialBankroll; 
-                    } else if (input.id === "betPercentage") {
-                        betPercentage = parsedValue || 0;
+                        currentBankroll = initialBankroll;
                     } else if (input.id === "odds") {
                         odds = parsedValue || 0;
+                    } else if (input.id === "winProbability") {
+                        winProbability = (parsedValue / 100) || 0;
                     }
                     updateDisplays();
                 });
             });
+
+            // Kelly Multiplier change listener
+            kellyMultiplierSelect.addEventListener('change', () => {
+                kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
+                updateDisplays();
+                hideKeyboard(); // Hide keyboard if it was visible (though not directly typing here)
+            });
+
 
             // Keyboard button click handler
             keyboardButtons.forEach(button => {
@@ -518,6 +620,7 @@
                             }
                         }
                     } else {
+                        // Max length for input values (e.g., "10000,00" or "10,50")
                         const maxInputLength = (activeInput.id === "initialBankroll") ? 10 : 5;
                         if (currentValue.length < maxInputLength) {
                             const parts = currentValue.split(',');
@@ -538,10 +641,11 @@
                     alert("Банкролл равен нулю. Сбросьте данные для начала новой сессии.");
                     return;
                 }
-                const betAmount = calculateNextBetSize(); // Use the same calculation for actual bet
-                
-                if (betAmount <= 0) { // Should not happen if currentBankroll > 0 due to MIN_BET, but good check
-                    alert("Невозможно сделать ставку. Проверьте банкролл.");
+                const { recommendedBetSize } = calculateKellyBet();
+                const betAmount = recommendedBetSize; // Use the Kelly recommended size
+
+                if (betAmount <= 0) {
+                    alert("Келли рекомендует не ставить (или ставка меньше 10). Убедитесь, что вероятность выигрыша достаточно высока для заданного коэффициента.");
                     return;
                 }
                 
@@ -555,10 +659,11 @@
                     alert("Банкролл равен нулю. Сбросьте данные для начала новой сессии.");
                     return;
                 }
-                const betAmount = calculateNextBetSize(); // Use the same calculation for actual bet
+                const { recommendedBetSize } = calculateKellyBet();
+                const betAmount = recommendedBetSize; // Use the Kelly recommended size
 
-                if (betAmount <= 0) { // Should not happen if currentBankroll > 0 due to MIN_BET, but good check
-                    alert("Невозможно сделать ставку. Проверьте банкролл.");
+                if (betAmount <= 0) {
+                    alert("Келли рекомендует не ставить (или ставка меньше 10). Убедитесь, что вероятность выигрыша достаточно высока для заданного коэффициента.");
                     return;
                 }
 
@@ -574,10 +679,12 @@
                 if (customKeyboard.classList.contains('visible') && activeInput) {
                     const isClickInsideKeyboard = customKeyboard.contains(event.target);
                     const isClickOnInput = activeInput.contains(event.target);
+                    const isClickOnSelect = (activeInput.tagName === 'SELECT' && activeInput.contains(event.target));
                     const isClickOnBetButton = winBtn.contains(event.target) || loseBtn.contains(event.target);
                     const isClickOnResetButton = resetBtn.contains(event.target);
 
-                    if (!isClickInsideKeyboard && !isClickOnInput && !isClickOnBetButton && !isClickOnResetButton) {
+                    // If click is not inside keyboard, not on current active input, and not on a control button
+                    if (!isClickInsideKeyboard && !isClickOnInput && !isClickOnSelect && !isClickOnBetButton && !isClickOnResetButton) {
                         hideKeyboard();
                     }
                 }
