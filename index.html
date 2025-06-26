@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Менеджер Ставок (Версия 4)</title>
+    <title>Менеджер Ставок (Версия 5)</title>
     <style>
         /* Общие стили */
         * {
@@ -20,8 +20,8 @@
             height: 100%;
             padding: 0;
             margin: 0;
-            touch-action: pan-y;
-            overflow: hidden;
+            touch-action: pan-y; /* Allows vertical scrolling */
+            /* Removed overflow: hidden; to allow scrolling when keyboard is active */
         }
 
         .container {
@@ -33,7 +33,7 @@
             justify-content: flex-start;
             gap: 0.8rem;
             min-height: 100vh;
-            overflow-y: auto;
+            overflow-y: auto; /* Allows scrolling within the container */
             -webkit-overflow-scrolling: touch;
         }
 
@@ -212,8 +212,9 @@
             pointer-events: none;
         }
         
+        /* When keyboard is active, add padding to container to prevent content being hidden by keyboard */
         body.keyboard-active .container {
-            padding-bottom: 220px;
+            padding-bottom: 220px; /* Adjust this value if keyboard height changes */
         }
 
         /* Warning messages */
@@ -348,7 +349,7 @@
             .buttons-row button, #resetBtn { font-size: 0.8rem; padding: 0.5rem; }
 
             body.keyboard-active .container {
-                padding-bottom: 170px;
+                padding-bottom: 170px; /* Adjust for smaller landscape screen */
             }
         }
     </style>
@@ -576,7 +577,7 @@
                 if (recommendedBreakevenBet > 0 && currentBankroll > 0) {
                     recommendedBreakevenBetDisplay.textContent = formatNumber(recommendedBreakevenBet);
                     recommendedBreakevenBetDisplay.classList.remove("neutral");
-                    recommendedBreakevenBetDisplay.classList.add("loss"); /* Using 'loss' class to visually tie to recovery from loss, or create 'recovery' class */
+                    recommendedBreakevenBetDisplay.classList.add("loss"); 
                 } else {
                     recommendedBreakevenBetDisplay.textContent = formatNumber(0);
                     recommendedBreakevenBetDisplay.classList.add("neutral");
@@ -608,16 +609,27 @@
             // Initial setup
             updateDisplays();
 
+            // Function to hide custom keyboard
+            const hideKeyboard = () => {
+                customKeyboard.classList.remove("visible");
+                document.body.classList.remove("keyboard-active");
+                if (activeInput) {
+                    activeInput.blur(); // Remove focus from the input
+                }
+                activeInput = null; // Clear active input
+            };
+
             // Event Listeners for inputs
             [initialBankrollInput, oddsInput, winProbabilityInput].forEach(input => {
-                input.setAttribute('inputmode', 'none');
-                input.setAttribute('readonly', 'readonly');
-                input.setAttribute('autocomplete', 'off');
+                input.setAttribute('inputmode', 'none'); // Prevent native keyboard
+                input.setAttribute('readonly', 'readonly'); // Make it read-only to force custom keyboard
+                input.setAttribute('autocomplete', 'off'); // Prevent autofill suggestions
 
                 input.addEventListener("focus", () => {
                     activeInput = input;
                     customKeyboard.classList.add("visible");
                     document.body.classList.add("keyboard-active");
+                    // Scroll active input into view after keyboard animation
                     setTimeout(() => {
                         activeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 300);
@@ -625,10 +637,7 @@
 
                 input.addEventListener("click", (e) => {
                     e.preventDefault(); // Prevent default mobile keyboard from appearing
-                    activeInput = input;
-                    customKeyboard.classList.add("visible");
-                    document.body.classList.add("keyboard-active");
-                    activeInput.focus(); // Set focus for caret
+                    // The focus event handler will show the keyboard
                 });
 
                 input.addEventListener("input", () => {
@@ -641,22 +650,22 @@
                     } else if (input.id === "winProbability") {
                         winProbability = (parsedValue / 100) || 0;
                     }
-                    updateDisplays();
+                    updateDisplays(); // Trigger display update on input change
                 });
             });
 
-            // Kelly Multiplier change listener
+            // Kelly Multiplier change listener (doesn't use custom keyboard)
             kellyMultiplierSelect.addEventListener('change', () => {
                 kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
                 updateDisplays();
-                // No hideKeyboard() here as dropdown itself closes upon selection
+                hideKeyboard(); // Hide keyboard if it was visible and user interacts with select
             });
 
 
             // Keyboard button click handler
             keyboardButtons.forEach(button => {
                 button.addEventListener("click", (e) => {
-                    e.preventDefault(); // Prevent blur on active input
+                    e.preventDefault(); // Prevent blur on active input when keyboard button is clicked
                     if (!activeInput) return;
 
                     const key = button.dataset.key;
@@ -673,17 +682,18 @@
                             }
                         }
                     } else {
+                        // Limit input length for practical values
                         const maxInputLength = (activeInput.id === "initialBankroll") ? 10 : 5; // e.g., "10000,00" or "10,50"
                         if (currentValue.length < maxInputLength) {
                             const parts = currentValue.split(',');
-                            if (parts.length === 1) {
+                            if (parts.length === 1) { // Before decimal/comma
                                 activeInput.value += key;
-                            } else if (parts.length === 2 && parts[1].length < 2) {
+                            } else if (parts.length === 2 && parts[1].length < 2) { // After decimal/comma, limit to 2 decimal places
                                 activeInput.value += key;
                             }
                         }
                     }
-                    activeInput.dispatchEvent(new Event('input')); // Trigger input event for display update
+                    activeInput.dispatchEvent(new Event('input')); // Manually trigger input event for display update
                 });
             });
 
@@ -694,9 +704,6 @@
                     return;
                 }
                 const { recommendedKellyBetSize } = calculateKellyBet();
-                // Here, we decide which bet amount to use for the transaction.
-                // For this version, we'll continue using Kelly's recommended size for actual transaction,
-                // as the 'break-even bet' is merely a suggestion for the user.
                 const betAmount = recommendedKellyBetSize; 
 
                 if (betAmount <= 0) {
@@ -732,21 +739,20 @@
 
             // Global click listener for hiding keyboard
             document.addEventListener('click', (event) => {
-                // Check if the clicked element is one of the input/select fields that use the keyboard
+                // Determine if the clicked element is one of the input fields that uses the custom keyboard
                 const isClickOnAKeyboardInput = 
                     event.target === initialBankrollInput || 
                     event.target === oddsInput || 
-                    event.target === winProbabilityInput ||
-                    event.target === kellyMultiplierSelect;
+                    event.target === winProbabilityInput; // Exclude kellyMultiplierSelect as it uses native picker
 
                 const isClickInsideKeyboard = customKeyboard.contains(event.target);
                 const isClickOnBetButton = winBtn.contains(event.target) || loseBtn.contains(event.target);
                 const isClickOnResetButton = resetBtn.contains(event.target);
 
-                // Only hide keyboard if it's visible, and the click is NOT:
-                // - inside the keyboard itself
-                // - on any of the input/select fields (this allows switching between inputs without flicker)
-                // - on a bet/reset button (these explicitly hide keyboard in their own handlers)
+                // Hide the keyboard if it's visible AND the click is NOT on:
+                // 1. The custom keyboard itself
+                // 2. Any input field that uses the custom keyboard (allows switching inputs without hiding)
+                // 3. A bet or reset button (these have their own hideKeyboard calls)
                 if (customKeyboard.classList.contains('visible') && 
                     !isClickInsideKeyboard && 
                     !isClickOnAKeyboardInput && 
