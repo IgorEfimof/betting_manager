@@ -428,7 +428,7 @@
         </header>
 
         <div class="warning-message">
-            <p><strong>Важное примечание:</strong> Чтобы быть в плюсе на дистанции, математическое ожидание (EV) вашей стратегии должно быть положительным.  Используйте этот инструмент с умом.</p>
+            <p><strong>Важное примечание:</strong> Чтобы быть в плюсе на дистанции, математическое ожидание (EV) вашей стратегии должно быть положительным. Никакая стратегия управления ставками не сделает минусовую стратегию плюсовой.</p>
         </div>
 
         <div class="input-group">
@@ -511,7 +511,7 @@
             Математическое ожидание отрицательное (EV < 0). Келли рекомендует не ставить.
         </div>
         <div id="recoveryWarningMessage" class="recovery-warning-message" style="display: none;">
-            <p><strong>Внимание:</strong> Стратегии восстановления убытков (как "догон") крайне рискованны, особенно при низком банкролле. Используйте с осторожностью.</p>
+            <p><strong>Внимание:</strong> Стратегии восстановления убытков (как "догон") крайне рискованны, особенно при отрицательном математическом ожидании. Они могут привести к быстрому истощению банкролла. Используйте с крайней осторожностью!</p>
         </div>
 
         <div class="buttons-row">
@@ -714,10 +714,7 @@
 
                 winPercentageDisplay.textContent = formatNumber(currentWinPercentage, 2) + '%';
                 lossPercentageDisplay.textContent = formatNumber(currentLossPercentage, 2) + '%';
-
-                //  % проходимости стратегии = % выигрышных - % проигрышных
-                const strategyHitRate = currentWinPercentage - currentLossPercentage;
-                strategyHitRateDisplay.textContent = formatNumber(strategyHitRate, 2) + '%';
+                strategyHitRateDisplay.textContent = formatNumber(currentWinPercentage, 2) + '%'; // "Проходимость стратегии"
             };
 
             const resetData = () => {
@@ -837,7 +834,7 @@
                 const betAmount = recommendedKellyBetSize; 
 
                 if (betAmount <= 0) {
-                    alert("Келли рекомендует не ставить (или ставка меньше 10). Убедитесь, что вероятность выигрыша достаточно высока.");
+                    alert("Келли рекомендует не ставить (или ставка меньше 10). Убедитесь, что вероятность выигрыша достаточно высока для заданного коэффициента.");
                     return;
                 }
                 
@@ -845,4 +842,59 @@
                 totalBets++; // Increment total bets
                 totalWins++; // Increment total wins
                 updateDisplays();
-                hideKeyboard
+                hideKeyboard();
+            });
+
+            loseBtn.addEventListener("click", () => {
+                if (currentBankroll <= 0) {
+                    alert("Банкролл равен нулю. Сбросьте данные для начала новой сессии.");
+                    return;
+                }
+                const { recommendedKellyBetSize } = calculateKellyBet();
+                const betAmount = recommendedKellyBetSize; 
+
+                if (betAmount <= 0) {
+                    alert("Келли рекомендует не ставить (или ставка меньше 10). Убедитесь, что вероятность выигрыша достаточно высока для заданного коэффициента.");
+                    return;
+                }
+
+                currentBankroll -= betAmount;
+                if (currentBankroll < 0) currentBankroll = 0;
+                totalBets++; // Increment total bets
+                totalLosses++; // Increment total losses
+                updateDisplays();
+                hideKeyboard();
+            });
+
+            resetBtn.addEventListener("click", resetData);
+
+            // Global click listener for hiding keyboard
+            document.addEventListener('click', (event) => {
+                // Determine if the clicked element is one of the input fields that uses the custom keyboard
+                const isClickOnAKeyboardInput = 
+                    event.target === initialBankrollInput || 
+                    event.target === oddsInput || 
+                    event.target === winProbabilityInput; // Exclude kellyMultiplierSelect as it uses native picker
+
+                const isClickInsideKeyboard = customKeyboard.contains(event.target);
+                const isClickOnBetButton = winBtn.contains(event.target) || loseBtn.contains(event.target);
+                const isClickOnResetButton = resetBtn.contains(event.target);
+
+                // Hide the keyboard if it's visible AND the click is NOT on:
+                // 1. The custom keyboard itself
+                // 2. Any input field that uses the custom keyboard (allows switching inputs without hiding)
+                // 3. A bet or reset button (these have their own hideKeyboard calls)
+                // 4. The Kelly Multiplier select, which uses its own native picker
+                if (customKeyboard.classList.contains('visible') && 
+                    !isClickInsideKeyboard && 
+                    !isClickOnAKeyboardInput && 
+                    !isClickOnBetButton && 
+                    !isClickOnResetButton &&
+                    event.target !== kellyMultiplierSelect) { // Explicitly check against kellyMultiplierSelect
+                    hideKeyboard();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
