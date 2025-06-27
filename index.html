@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Менеджер Ставок (Версия 6)</title>
+    <title>Менеджер Ставок (Версия 7)</title>
     <style>
         /* Общие стили */
         * {
@@ -21,7 +21,6 @@
             padding: 0;
             margin: 0;
             touch-action: pan-y; /* Allows vertical scrolling */
-            /* overflow: hidden; - УДАЛЕНО, чтобы разрешить прокрутку страницы, если контент не помещается */
         }
 
         .container {
@@ -53,7 +52,7 @@
             color: #ccc;
         }
 
-        .input-group, .display-group {
+        .input-group, .display-group, .statistics-group { /* Добавлен .statistics-group */
             background-color: #1e1e1e;
             padding: 0.7rem;
             border-radius: 8px;
@@ -110,6 +109,44 @@
         .display-item span.neutral {
             color: #ffa726; /* Orange for zero/neutral */
         }
+
+        /* Styles for Statistics Group */
+        .statistic-item-full {
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center;
+            gap: 0.5rem; /* Gap between label and span */
+            font-size: 0.9rem;
+        }
+
+        .statistic-row-split {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.6rem; /* Gap between left and right halves */
+        }
+
+        .statistic-item-half {
+            flex: 1; /* Take equal width */
+            display: flex;
+            justify-content: space-between; /* Between label and span */
+            align-items: center;
+            font-size: 0.9rem;
+            padding: 0 0.2rem; /* Small internal padding for visual separation */
+        }
+
+        .statistics-group label {
+            color: #ccc;
+            flex-shrink: 0;
+            margin-right: 0.3rem; /* Small margin for label */
+        }
+
+        .statistics-group span {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #66bb6a; /* Default to success color */
+        }
+        /* End Styles for Statistics Group */
+
 
         .buttons-row {
             display: flex;
@@ -258,90 +295,124 @@
         /* Медиа-запросы для узких экранов (смартфоны и планшеты в портрете) */
         @media (max-width: 768px) {
             .container {
-                padding: 0.2rem; /* Снижено с 0.3rem */
-                gap: 0.3rem;   /* Снижено с 0.5rem */
+                padding: 0.2rem;
+                gap: 0.3rem;
             }
 
             header {
-                padding: 0.1rem 0; /* Снижено с 0.2rem */
+                padding: 0.1rem 0;
             }
 
             h1 {
-                font-size: 0.9rem; /* Снижено с 1rem */
+                font-size: 0.9rem;
             }
 
             p {
-                font-size: 0.7rem; /* Снижено с 0.75rem */
+                font-size: 0.7rem;
             }
 
             .warning-message, .recovery-warning-message, .kelly-warning {
-                padding: 0.4rem; /* Снижено с 0.5rem / 0.6rem */
-                font-size: 0.65rem; /* Снижено с 0.7rem / 0.75rem */
+                padding: 0.4rem;
+                font-size: 0.65rem;
             }
             
-            .input-group, .display-group {
-                padding: 0.4rem; /* Снижено с 0.5rem */
-                gap: 0.3rem;   /* Снижено с 0.4rem */
+            .input-group, .display-group, .statistics-group { /* Добавлен .statistics-group */
+                padding: 0.4rem;
+                gap: 0.3rem;
             }
 
             .input-item, .display-item {
-                font-size: 0.75rem; /* Снижено с 0.8rem */
+                font-size: 0.75rem;
             }
 
             .input-item label, .display-item label {
-                font-size: 0.7rem; /* Снижено с 0.75rem */
-                margin-right: 0.2rem; /* Снижено с 0.3rem */
+                font-size: 0.7rem;
+                margin-right: 0.2rem;
             }
 
             .input-item input[type="text"], .input-item select {
-                padding: 0.25rem; /* Снижено с 0.3rem */
-                font-size: 0.75rem; /* Снижено с 0.8rem */
+                padding: 0.25rem;
+                font-size: 0.75rem;
             }
             .input-item select {
-                padding-right: 1rem; /* Уменьшено пространство для стрелки */
-                background-position: right 0.1rem center; /* Перемещена стрелка ближе */
+                padding-right: 1rem;
+                background-position: right 0.1rem center;
             }
 
             .display-item span {
-                font-size: 0.8rem; /* Снижено с 0.9rem */
+                font-size: 0.8rem;
             }
 
+            /* Statistics Group adaptation */
+            .statistic-item-full, .statistic-item-half {
+                font-size: 0.75rem;
+                gap: 0.3rem;
+            }
+            .statistics-group label {
+                font-size: 0.7rem;
+                margin-right: 0.1rem;
+            }
+            .statistics-group span {
+                font-size: 0.8rem;
+            }
+            .statistic-item-half {
+                padding: 0 0.1rem;
+            }
+            /* End Statistics Group adaptation */
+
             .buttons-row {
-                gap: 0.3rem; /* Снижено с 0.4rem */
+                gap: 0.3rem;
             }
 
             .buttons-row button {
-                padding: 0.5rem 0.3rem; /* Снижено с 0.6rem */
-                font-size: 0.85rem;   /* Снижено с 0.9rem */
+                padding: 0.5rem 0.3rem;
+                font-size: 0.85rem;
             }
 
             #resetBtn {
-                margin-top: 0.3rem; /* Снижено с 0.4rem */
-                padding: 0.5rem 0.3rem; /* Снижено с 0.6rem */
-                font-size: 0.8rem; /* Снижено с 0.85rem */
+                margin-top: 0.3rem;
+                padding: 0.5rem 0.3rem;
+                font-size: 0.8rem;
             }
 
             body.keyboard-active .container {
-                padding-bottom: 220px; /* Оставляем без изменений, т.к. относится к активной клавиатуре */
+                padding-bottom: 220px;
             }
         }
 
         /* Медиа-запросы для альбомной ориентации iPad и других планшетов (ширина больше высоты) */
         @media (orientation: landscape) and (max-height: 768px) {
             .container {
-                gap: 0.3rem; /* Снижено с 0.4rem */
-                padding: 0.2rem; /* Снижено с 0.3rem */
+                gap: 0.3rem;
+                padding: 0.2rem;
             }
-            h1 { font-size: 0.9rem; } /* Снижено с 0.95rem */
-            p { font-size: 0.65rem; } /* Снижено с 0.7rem */
-            .warning-message, .recovery-warning-message, .kelly-warning { font-size: 0.6rem; padding: 0.3rem; } /* Снижено с 0.65rem/0.4rem */
-            .input-item label, .display-item label { font-size: 0.65rem; margin-right: 0.1rem; } /* Снижено с 0.75rem/0.2rem */
-            .input-item input, .display-item span, .input-item select { font-size: 0.75rem; padding: 0.2rem; } /* Снижено с 0.8rem/0.25rem */
+            h1 { font-size: 0.9rem; }
+            p { font-size: 0.65rem; }
+            .warning-message, .recovery-warning-message, .kelly-warning { font-size: 0.6rem; padding: 0.3rem; }
+            .input-item label, .display-item label { font-size: 0.65rem; margin-right: 0.1rem; }
+            .input-item input, .display-item span, .input-item select { font-size: 0.75rem; padding: 0.2rem; }
             .input-item select {
-                padding-right: 0.8rem; /* Снижено с 1.5rem */
-                background-position: right 0.05rem center; /* Перемещена стрелка еще ближе */
+                padding-right: 0.8rem;
+                background-position: right 0.05rem center;
             }
-            .buttons-row button, #resetBtn { font-size: 0.75rem; padding: 0.4rem; } /* Снижено с 0.8rem/0.5rem */
+            /* Statistics Group adaptation for landscape */
+            .statistic-item-full, .statistic-item-half {
+                font-size: 0.7rem;
+                gap: 0.2rem;
+            }
+            .statistics-group label {
+                font-size: 0.65rem;
+                margin-right: 0.1rem;
+            }
+            .statistics-group span {
+                font-size: 0.75rem;
+            }
+            .statistic-item-half {
+                padding: 0 0.05rem;
+            }
+            /* End Statistics Group adaptation for landscape */
+
+            .buttons-row button, #resetBtn { font-size: 0.75rem; padding: 0.4rem; }
 
             body.keyboard-active .container {
                 padding-bottom: 170px;
@@ -405,6 +476,37 @@
                 <span id="totalProfitLossDisplay" class="loss">0.00</span>
             </div>
         </div>
+        
+        <div class="statistics-group">
+            <div class="statistic-item-full">
+                <label>Общее кол. ставок:</label>
+                <span id="totalBetsDisplay">0</span>
+            </div>
+            <div class="statistic-row-split">
+                <div class="statistic-item-half">
+                    <label>Кол. выигрышных:</label>
+                    <span id="totalWinsDisplay">0</span>
+                </div>
+                <div class="statistic-item-half">
+                    <label>Кол. проигрышных:</label>
+                    <span id="totalLossesDisplay">0</span>
+                </div>
+            </div>
+            <div class="statistic-row-split">
+                <div class="statistic-item-half">
+                    <label>% выигрышных:</label>
+                    <span id="winPercentageDisplay">0.00%</span>
+                </div>
+                <div class="statistic-item-half">
+                    <label>% проигрышных:</label>
+                    <span id="lossPercentageDisplay">0.00%</span>
+                </div>
+            </div>
+            <div class="statistic-item-full">
+                <label>% проходимости стратегии:</label>
+                <span id="strategyHitRateDisplay">0.00%</span>
+            </div>
+        </div>
         <div id="kellyWarningMessage" class="kelly-warning">
             Математическое ожидание отрицательное (EV < 0). Келли рекомендует не ставить.
         </div>
@@ -452,6 +554,14 @@
             const kellyWarningMessage = document.getElementById("kellyWarningMessage");
             const recoveryWarningMessage = document.getElementById("recoveryWarningMessage");
 
+            // New DOM elements for statistics
+            const totalBetsDisplay = document.getElementById("totalBetsDisplay");
+            const totalWinsDisplay = document.getElementById("totalWinsDisplay");
+            const totalLossesDisplay = document.getElementById("totalLossesDisplay");
+            const winPercentageDisplay = document.getElementById("winPercentageDisplay");
+            const lossPercentageDisplay = document.getElementById("lossPercentageDisplay");
+            const strategyHitRateDisplay = document.getElementById("strategyHitRateDisplay");
+
             const winBtn = document.getElementById("winBtn");
             const loseBtn = document.getElementById("loseBtn");
             const resetBtn = document.getElementById("resetBtn");
@@ -465,6 +575,11 @@
             let odds = parseFloat(oddsInput.value);
             let winProbability = parseFloat(winProbabilityInput.value) / 100; // Convert to decimal
             let kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
+
+            // New variables for statistics
+            let totalBets = 0;
+            let totalWins = 0;
+            let totalLosses = 0;
 
             // Function to format numbers
             const formatNumber = (num, decimals = 2) => {
@@ -588,6 +703,18 @@
                     totalProfitLossDisplay.classList.remove("profit");
                     totalProfitLossDisplay.classList.add("loss");
                 }
+
+                // Update statistics displays
+                totalBetsDisplay.textContent = totalBets;
+                totalWinsDisplay.textContent = totalWins;
+                totalLossesDisplay.textContent = totalLosses;
+
+                const currentWinPercentage = totalBets > 0 ? (totalWins / totalBets) * 100 : 0;
+                const currentLossPercentage = totalBets > 0 ? (totalLosses / totalBets) * 100 : 0;
+
+                winPercentageDisplay.textContent = formatNumber(currentWinPercentage, 2) + '%';
+                lossPercentageDisplay.textContent = formatNumber(currentLossPercentage, 2) + '%';
+                strategyHitRateDisplay.textContent = formatNumber(currentWinPercentage, 2) + '%'; // "Проходимость стратегии"
             };
 
             const resetData = () => {
@@ -597,6 +724,11 @@
                 kellyMultiplier = parseFloat(kellyMultiplierSelect.value);
 
                 currentBankroll = initialBankroll;
+                // Reset statistics
+                totalBets = 0;
+                totalWins = 0;
+                totalLosses = 0;
+
                 updateDisplays();
                 hideKeyboard();
             };
@@ -707,6 +839,8 @@
                 }
                 
                 currentBankroll += (betAmount * (odds - 1));
+                totalBets++; // Increment total bets
+                totalWins++; // Increment total wins
                 updateDisplays();
                 hideKeyboard();
             });
@@ -726,6 +860,8 @@
 
                 currentBankroll -= betAmount;
                 if (currentBankroll < 0) currentBankroll = 0;
+                totalBets++; // Increment total bets
+                totalLosses++; // Increment total losses
                 updateDisplays();
                 hideKeyboard();
             });
